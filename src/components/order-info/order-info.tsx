@@ -1,21 +1,41 @@
 import { Preloader, OrderInfoUI } from '@ui';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { selectFeedOrders } from '../../services/slices/feed-slice';
+import { selectIngredients } from '../../services/slices/ingredients-slice';
+import {
+  fetchOrderByNumber,
+  selectOrderDetails,
+} from '../../services/slices/order-slice';
+import { selectProfileOrders } from '../../services/slices/profile-orders-slice';
+import { useDispatch, useSelector } from '../../services/store';
 
 import type { TIngredient } from '@utils-types';
 
 export const OrderInfo = (): React.JSX.Element => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0,
-  };
+  const dispatch = useDispatch();
+  const { number } = useParams();
+  const orderNumber = Number(number);
 
-  const ingredients: TIngredient[] = [];
+  /** TODO: взять переменные orderData и ingredients из стора */
+  const ingredients = useSelector(selectIngredients);
+  const feedOrders = useSelector(selectFeedOrders);
+  const profileOrders = useSelector(selectProfileOrders);
+  const orderDetails = useSelector(selectOrderDetails);
+
+  /* Сначала ищем заказ среди уже загруженных (лента или история),
+     а при прямом переходе по ссылке запрашиваем его с сервера. */
+  const orderData =
+    feedOrders.find((order) => order.number === orderNumber) ??
+    profileOrders.find((order) => order.number === orderNumber) ??
+    (orderDetails?.number === orderNumber ? orderDetails : null);
+
+  useEffect(() => {
+    if (!orderData && orderNumber) {
+      void dispatch(fetchOrderByNumber(orderNumber));
+    }
+  }, [dispatch, orderData, orderNumber]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
