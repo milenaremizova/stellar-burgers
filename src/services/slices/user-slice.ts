@@ -56,12 +56,16 @@ export const registerUser = createAsyncThunk(
 export const loginUser = createAsyncThunk('user/loginUser', async (data: TLoginData) => {
   const response = await loginUserApi(data);
   saveTokens(response);
+  // воспроизвела кейс и увидела, что при сценарии, где юзер не завершает смену пароля и входит по старому, не очищается запись reset password, подумала, что ее тоже будет хорошо убрать
+  // при успешном входе очищаю от записи reset password, если юзер при смене пароля не завершил процесс, вспомнив старый и залогинившись по нему
+  localStorage.removeItem('resetPassword');
   return response.user;
 });
 
 export const logoutUser = createAsyncThunk('user/logoutUser', async () => {
   await logoutApi();
-  clearTokens();
+  deleteCookie('accessToken');
+  localStorage.clear(); // полная очистка данных сессии
 });
 
 /* Проверка авторизации при старте приложения. Если accessToken в cookie уже
