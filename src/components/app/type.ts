@@ -10,7 +10,7 @@ export type AppContentProps = {
 };
 
 export type TDetailsPageProps = {
-  title: string;
+  // убран проп тайтл, чтобы его не требовало в detailspage
   children: ReactNode;
 };
 

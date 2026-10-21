@@ -13,6 +13,10 @@ import { useDispatch, useSelector } from '../../services/store';
 
 import type { TIngredient } from '@utils-types';
 
+import styles from './order-info.module.css';
+
+const ORDER_NUMBER_LENGTH = 6;
+
 export const OrderInfo = (): React.JSX.Element => {
   const dispatch = useDispatch();
   const { number } = useParams();
@@ -81,5 +85,12 @@ export const OrderInfo = (): React.JSX.Element => {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <>
+      <p className={`${styles.number} text text_type_digits-default`}>
+        #{String(orderInfo.number).padStart(ORDER_NUMBER_LENGTH, '0')}
+      </p>
+      <OrderInfoUI orderInfo={orderInfo} />
+    </>
+  );
 };

@@ -18,7 +18,7 @@ import {
 } from '@pages';
 import { Preloader } from '@ui';
 import { useCallback, useEffect } from 'react';
-import { Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   fetchIngredients,
@@ -34,12 +34,6 @@ import type { AppContentProps, TDetailsPageProps, TLocationState } from './type'
 import '../../index.css';
 
 import styles from './app.module.css';
-
-const INGREDIENT_DETAILS_TITLE = 'Детали ингредиента';
-const ORDER_NUMBER_LENGTH = 6;
-
-const formatOrderNumber = (orderNumber = ''): string =>
-  `#${orderNumber.padStart(ORDER_NUMBER_LENGTH, '0')}`;
 
 const App = (): React.JSX.Element => {
   const dispatch = useDispatch();
@@ -110,15 +104,15 @@ const RouteComponent = (): React.JSX.Element => {
         <Route
           path="/feed/:number"
           element={
-            <OrderDetailsPage>
+            <DetailsPage>
               <OrderInfo />
-            </OrderDetailsPage>
+            </DetailsPage>
           }
         />
         <Route
           path="/ingredients/:id"
           element={
-            <DetailsPage title={INGREDIENT_DETAILS_TITLE}>
+            <DetailsPage>
               <IngredientDetails />
             </DetailsPage>
           }
@@ -175,9 +169,9 @@ const RouteComponent = (): React.JSX.Element => {
           path="/profile/orders/:number"
           element={
             <ProtectedRoute>
-              <OrderDetailsPage>
+              <DetailsPage>
                 <OrderInfo />
-              </OrderDetailsPage>
+              </DetailsPage>
             </ProtectedRoute>
           }
         />
@@ -189,15 +183,15 @@ const RouteComponent = (): React.JSX.Element => {
           <Route
             path="/feed/:number"
             element={
-              <OrderModal onClose={handleModalClose}>
+              <Modal title="" onClose={handleModalClose}>
                 <OrderInfo />
-              </OrderModal>
+              </Modal>
             }
           />
           <Route
             path="/ingredients/:id"
             element={
-              <Modal title={INGREDIENT_DETAILS_TITLE} onClose={handleModalClose}>
+              <Modal title="" onClose={handleModalClose}>
                 <IngredientDetails />
               </Modal>
             }
@@ -206,9 +200,9 @@ const RouteComponent = (): React.JSX.Element => {
             path="/profile/orders/:number"
             element={
               <ProtectedRoute>
-                <OrderModal onClose={handleModalClose}>
+                <Modal title="" onClose={handleModalClose}>
                   <OrderInfo />
-                </OrderModal>
+                </Modal>
               </ProtectedRoute>
             }
           />
@@ -218,30 +212,6 @@ const RouteComponent = (): React.JSX.Element => {
   );
 };
 
-const DetailsPage = ({ title, children }: TDetailsPageProps): React.JSX.Element => (
-  <div className={styles.detailPageWrap}>
-    <h3 className={`${styles.detailHeader} text text_type_main-large`}>{title}</h3>
-    {children}
-  </div>
+const DetailsPage = ({ children }: TDetailsPageProps): React.JSX.Element => (
+  <div className={styles.detailPageWrap}>{children}</div>
 );
-
-const OrderDetailsPage = ({
-  children,
-}: Omit<TDetailsPageProps, 'title'>): React.JSX.Element => {
-  const { number } = useParams();
-
-  return <DetailsPage title={formatOrderNumber(number)}>{children}</DetailsPage>;
-};
-
-const OrderModal = ({
-  onClose,
-  children,
-}: Omit<TDetailsPageProps, 'title'> & { onClose: () => void }): React.JSX.Element => {
-  const { number } = useParams();
-
-  return (
-    <Modal title={formatOrderNumber(number)} onClose={onClose}>
-      {children}
-    </Modal>
-  );
-};
