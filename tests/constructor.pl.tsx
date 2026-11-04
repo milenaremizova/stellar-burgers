@@ -6,6 +6,8 @@ const BUN_NAME = 'Краторная булка N-200i';
 const MAIN_NAME = 'Говяжий метеорит (отбивная)';
 const MAIN_CALORIES = '2674';
 
+const ORDER_NUMBER = '12345';
+
 const getIngredientCard = (page: Page, name: string): Locator =>
   page.getByRole('listitem').filter({ has: page.getByRole('link', { name }) });
 
@@ -72,5 +74,54 @@ test.describe('конструктор бургера', () => {
 
       await expect(modal).toBeHidden();
     });
+  });
+});
+
+test.describe('создание заказа', () => {
+  test.beforeEach(async ({ page, context }) => {
+    // Подменяем все запросы к бэкенду, которые будут в этом тесте
+    await page.routeFromHAR('tests/hars/ingredients.har', { url: '**/api/ingredients' });
+    await page.routeFromHAR('tests/hars/user.har', { url: '**/api/auth/user' });
+    await page.routeFromHAR('tests/hars/order.har', { url: '**/api/orders' });
+
+    // Фейковые токены: accessToken — в cookie, refreshToken — в localStorage
+    await context.addCookies([
+      {
+        name: 'accessToken',
+        value: 'Bearer test-access-token',
+        url: 'http://localhost:4000',
+      },
+    ]);
+    await page.addInitScript(() => {
+      localStorage.setItem('refreshToken', 'test-refresh-token');
+    });
+
+    await page.goto('/');
+  });
+
+  test('оформляет заказ, показывает его номер и очищает конструктор', async ({
+    page,
+  }) => {
+    const burgerConstructor = page.getByTestId('constructor');
+
+    await getIngredientCard(page, BUN_NAME)
+      .getByRole('button', { name: 'Добавить' })
+      .click();
+
+    await getIngredientCard(page, MAIN_NAME)
+      .getByRole('button', { name: 'Добавить' })
+      .click();
+
+    await burgerConstructor.getByRole('button', { name: 'Оформить заказ' }).click();
+
+    const modal = page.getByTestId('modal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText(ORDER_NUMBER)).toBeVisible();
+
+    await modal.getByRole('button', { name: 'Закрыть' }).click();
+    await expect(modal).toBeHidden();
+
+    await expect(burgerConstructor.getByText('Выберите булки')).toHaveCount(2);
+    await expect(burgerConstructor.getByText('Выберите начинку')).toHaveCount(1);
   });
 });
