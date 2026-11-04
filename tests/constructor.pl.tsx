@@ -79,12 +79,10 @@ test.describe('конструктор бургера', () => {
 
 test.describe('создание заказа', () => {
   test.beforeEach(async ({ page, context }) => {
-    // Подменяем все запросы к бэкенду, которые будут в этом тесте
     await page.routeFromHAR('tests/hars/ingredients.har', { url: '**/api/ingredients' });
     await page.routeFromHAR('tests/hars/user.har', { url: '**/api/auth/user' });
     await page.routeFromHAR('tests/hars/order.har', { url: '**/api/orders' });
 
-    // Фейковые токены: accessToken — в cookie, refreshToken — в localStorage
     await context.addCookies([
       {
         name: 'accessToken',
