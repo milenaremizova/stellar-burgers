@@ -17,7 +17,10 @@ describe('burgerConstructorSlice: редьюсер конструктора бу
   test('возвращает начальное состояние при неизвестном экшене', () => {
     const state = reducer(undefined, { type: 'UNKNOWN' });
 
-    expect(state).toEqual(initialState);
+    expect(state).toEqual({
+      bun: null,
+      ingredients: [],
+    });
   });
 
   describe('добавление ингредиента addIngredient', () => {
@@ -25,7 +28,7 @@ describe('burgerConstructorSlice: редьюсер конструктора бу
       const state = reducer(initialState, addIngredient(mockBun));
 
       expect(state.bun).toEqual({ ...mockBun, id: expect.any(String) as string });
-      expect(state.ingredients).toHaveLength(0);
+      expect(state.ingredients).toEqual([]);
     });
 
     test('начинка добавляется в ingredients', () => {
@@ -57,15 +60,16 @@ describe('burgerConstructorSlice: редьюсер конструктора бу
     test('removeIngredient удаляет начинку по id', () => {
       const state = reducer(stateWithFillings, removeIngredient('main-1'));
 
-      expect(state.ingredients).toHaveLength(1);
-      expect(state.ingredients[0].id).toBe('sauce-1');
+      expect(state.ingredients).toEqual([{ ...mockSauce, id: 'sauce-1' }]);
     });
 
     test('moveIngredient меняет порядок начинок', () => {
       const state = reducer(stateWithFillings, moveIngredient({ from: 0, to: 1 }));
 
-      expect(state.ingredients[0].id).toBe('sauce-1');
-      expect(state.ingredients[1].id).toBe('main-1');
+      expect(state.ingredients).toEqual([
+        { ...mockSauce, id: 'sauce-1' },
+        { ...mockMain, id: 'main-1' },
+      ]);
     });
   });
 
@@ -78,13 +82,19 @@ describe('burgerConstructorSlice: редьюсер конструктора бу
     test('resetConstructor очищает конструктор', () => {
       const state = reducer(filledState, resetConstructor());
 
-      expect(state).toEqual(initialState);
+      expect(state).toEqual({
+        bun: null,
+        ingredients: [],
+      });
     });
 
     test('createOrder.fulfilled очищает конструктор после оформления заказа', () => {
       const state = reducer(filledState, { type: createOrder.fulfilled.type });
 
-      expect(state).toEqual(initialState);
+      expect(state).toEqual({
+        bun: null,
+        ingredients: [],
+      });
     });
   });
 });

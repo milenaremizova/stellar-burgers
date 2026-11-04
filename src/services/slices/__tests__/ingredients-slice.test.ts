@@ -11,12 +11,21 @@ describe('ingredientsSlice: редьюсер списка ингредиенто
   test('возвращает начальное состояние при неизвестном экшене', () => {
     const state = reducer(undefined, { type: 'UNKNOWN' });
 
-    expect(state).toEqual(initialState);
+    expect(state).toEqual({
+      ingredients: [],
+      isLoading: false,
+      error: null,
+    });
   });
 
   describe('загрузка ингредиентов fetchIngredients', () => {
     test('pending: включает загрузку и сбрасывает ошибку', () => {
-      const state = reducer(initialState, { type: fetchIngredients.pending.type });
+      const errorState = {
+        ingredients: [],
+        isLoading: false,
+        error: { message: 'ошибка загрузки' },
+      };
+      const state = reducer(errorState, { type: fetchIngredients.pending.type });
 
       expect(state.isLoading).toBe(true);
       expect(state.error).toBeNull();
