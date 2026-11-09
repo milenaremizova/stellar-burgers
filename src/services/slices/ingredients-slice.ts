@@ -10,7 +10,7 @@ type TIngredientsState = {
   error: SerializedError | null;
 };
 
-const initialState: TIngredientsState = {
+export const initialState: TIngredientsState = {
   ingredients: [],
   isLoading: false,
   error: null,
